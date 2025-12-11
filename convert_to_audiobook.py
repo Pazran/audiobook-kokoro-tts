@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 # ---------------- CONFIG ----------------
 KOKORO = "kokoro-tts"            # CLI command
-VOICE = "af_bella"               # default voice #bf_isabella
+VOICE = "bf_isabella"               # default voice #bf_isabella #af_bella
 SPEED = "1.0"                    # speech speed
 FORMAT = "wav"                   # output format
 MODEL_FILE = "kokoro-v1.0.onnx"
