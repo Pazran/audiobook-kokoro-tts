@@ -3,7 +3,7 @@ setlocal
 
 REM Path to your venv
 set VENV_PATH=venv
-set SCRIPT_PATH=to_audiobook.py
+set SCRIPT_PATH=convert_to_audiobook.py
 
 REM If dragged-in file exists, use it
 if exist "%~1" (
