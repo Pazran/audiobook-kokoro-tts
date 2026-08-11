@@ -22,9 +22,10 @@ OUTPUT_ROOT = "audiobook_output"   # root output folder
 # ----------------------------------------
 
 def run_kokoro(cmd):
-    """Run Kokoro CLI with GPU environment"""
+    """Run Kokoro CLI with GPU + UTF-8 output environment"""
     env = os.environ.copy()
     env["ONNX_PROVIDER"] = "CUDAExecutionProvider"   # force GPU
+    env["PYTHONIOENCODING"] = "utf-8"                # avoid cp1252 console crashes
     subprocess.run(cmd, check=True, env=env)
 
 # ---------------- RENDER STATE (completion sentinel) ----------------
