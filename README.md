@@ -84,8 +84,6 @@ Changing `VOICE`, `SPEED`, `FORMAT`, `MODEL_FILE`, or `VOICES_FILE`, or editing 
 
 ---
 
-## License
-
 ## Troubleshooting
 
 - **"CLI 'kokoro-tts' not found on PATH"**: launch via the BAT file, or activate the venv first.
