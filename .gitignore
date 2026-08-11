@@ -26,4 +26,12 @@ Desktop.ini
 
 # Audio/book output or cache folders (custom)
 output/
+audiobook_output/
 cache/
+
+# Kokoro model artifacts (large binaries, downloadable from releases)
+kokoro-*.onnx
+voices-*.bin
+
+# Generated audio
+*.wav
