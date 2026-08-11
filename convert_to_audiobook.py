@@ -19,6 +19,7 @@ FORMAT = "wav"                   # output format
 MODEL_FILE = "kokoro-v1.0.onnx"
 VOICES_FILE = "voices-v1.0.bin"
 OUTPUT_ROOT = "audiobook_output"   # root output folder
+SUPPORTED_EXTS = {".txt", ".epub", ".pdf"}
 # ----------------------------------------
 
 def run_kokoro(cmd):
@@ -27,6 +28,35 @@ def run_kokoro(cmd):
     env["ONNX_PROVIDER"] = "CUDAExecutionProvider"   # force GPU
     env["PYTHONIOENCODING"] = "utf-8"                # avoid cp1252 console crashes
     subprocess.run(cmd, check=True, env=env)
+
+# ---------------- PREFLIGHT ----------------
+def fail(msg):
+    """Log an error and exit with a friendly message."""
+    logger.error(msg)
+    sys.exit(1)
+
+def preflight_input(input_path):
+    """Tier 0: free checks, always run before any work."""
+    if input_path.suffix.lower() not in SUPPORTED_EXTS:
+        fail(f"Unsupported file type '{input_path.suffix}'. Only TXT, EPUB, and PDF are supported.")
+    if not input_path.is_file():
+        fail(f"File not found: {input_path}")
+
+def preflight_render():
+    """Tier 1: checks that matter only when a render will happen."""
+    for name in (MODEL_FILE, VOICES_FILE):
+        if not Path(name).is_file():
+            fail(f"Missing required file next to the script: {name}")
+    cli = shutil.which(KOKORO)
+    if cli is None:
+        fail(f"CLI '{KOKORO}' not found on PATH. Launch via convert_to_audiobook.bat so the venv is active.")
+    try:
+        result = subprocess.run([cli, "--help"], capture_output=True, timeout=30)
+    except subprocess.TimeoutExpired:
+        fail(f"CLI '{KOKORO}' hung during the boot check (30s timeout). The venv may be broken.")
+    if result.returncode != 0:
+        fail(f"CLI '{KOKORO}' crashed during boot check (exit {result.returncode}). "
+             f"The venv is missing dependencies. Repair with: venv\\Scripts\\pip install --force-reinstall kokoro-tts")
 
 # ---------------- RENDER STATE (completion sentinel) ----------------
 SENTINEL_NAME = "COMPLETE"
@@ -81,6 +111,8 @@ def write_sentinel(output_dir, fingerprint):
 
 def process_file(input_file):
     input_path = Path(input_file)
+    preflight_input(input_path)   # tier 0: free checks, always
+
     book_name = input_path.stem
     output_dir = Path(OUTPUT_ROOT) / book_name
 
@@ -98,6 +130,9 @@ def process_file(input_file):
     if not should_render(output_dir, fingerprint):
         logger.info(f"Finished audiobook already in: {output_dir}")
         return
+
+    # Step 0.5: render-only preflight (CLI must exist and boot)
+    preflight_render()
     clean_output_dir(output_dir)
 
     # Step 1: process file (split chapters into chunks)
@@ -134,12 +169,7 @@ def main():
         print("Drag  & drop a TXT, EPUB, or PDF onto this script.")
         sys.exit(1)
 
-    input_file = sys.argv[1]
-    if not os.path.isfile(input_file):
-        logger.error("File not found: %s", input_file)
-        sys.exit(1)
-
-    process_file(input_file)
+    process_file(sys.argv[1])
 
 if __name__ == "__main__":
     main()
