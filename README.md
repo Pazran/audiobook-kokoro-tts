@@ -84,9 +84,17 @@ Changing `VOICE`, `SPEED`, `FORMAT`, `MODEL_FILE`, or `VOICES_FILE`, or editing 
 
 ---
 
+## License
+
 ## Troubleshooting
 
 - **"CLI 'kokoro-tts' not found on PATH"**: launch via the BAT file, or activate the venv first.
 - **"The venv is missing dependencies"**: run `venv\Scripts\pip install --force-reinstall kokoro-tts` to re-resolve the full dependency tree.
 - **"Unsupported file type"**: only TXT, EPUB, and PDF are accepted.
 - **Render uses CPU instead of GPU**: make sure only `onnxruntime-gpu` is installed. The plain `onnxruntime` (CPU) package and the GPU build install files to the same paths, so the last one installed wins. Evict the CPU build with `venv\Scripts\pip uninstall -y onnxruntime` and reinstall `onnxruntime-gpu`.
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
